@@ -9,19 +9,21 @@ type DFA struct {
 	currentState	int
 	totalStates		[]int
 	finalStates		[]int
-	transition		map[transitionData]int
+  transition		map[dfaTransitionData]int
+  symbolMap     map[string]bool
 }
 
-type transitionData struct {
+type dfaTransitionData struct {
   srcState      int
-  alphabet      string  
+  symbol        string  
 } 
 
 func NewDFA(initialState int, isFinal bool) *DFA {
 	newDFA := &DFA{
 		initialState: initialState,
 		currentState: initialState,
-    transition: make(map[transitionData]int),
+    transition: make(map[dfaTransitionData]int),
+    symbolMap:  make(map[string]bool),
   }
   
   newDFA.AddState(initialState, isFinal)
@@ -43,7 +45,7 @@ func (dfa *DFA) AddState(state int, isFinal bool) error {
   return nil
 }
 
-func (dfa *DFA) AddTransition(srcState int, alphabet string, dstState int) error {
+func (dfa *DFA) AddTransition(srcState int, symbol string, dstState int) error {
   srcStateFound := false
 
   for _, v := range dfa.totalStates {
@@ -56,9 +58,13 @@ func (dfa *DFA) AddTransition(srcState int, alphabet string, dstState int) error
     return errors.New("Error, no se encontro ningun estado")
   }
   
-  newTrans := transitionData {
+  if _, ok := dfa.symbolMap[symbol]; !ok {
+    dfa.symbolMap[symbol] = true
+  }
+
+  newTrans := dfaTransitionData {
     srcState: srcState,
-    alphabet: alphabet,
+    symbol: symbol,
   }
 
   dfa.transition[newTrans] = dstState
@@ -66,3 +72,18 @@ func (dfa *DFA) AddTransition(srcState int, alphabet string, dstState int) error
   return nil
 }
 
+func (dfa *DFA) ValidateFinalState() bool {
+  for _, val := dfa.finalState {
+    if v == dfa.currentState {
+      return true
+    }
+  }
+  return false
+}
+
+func (dfa *DFA) ValidateSymbol(symbols []string) bool {
+  for _, val := range symbols {
+    
+  }
+  return dfa.ValidateFinalState()
+}
