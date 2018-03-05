@@ -1,89 +1,79 @@
 package automata
 
 import (
-  "errors"
+	"errors"
 )
 
+//DFA struct
 type DFA struct {
-	initialState	int
-	currentState	int
-	totalStates		[]int
-	finalStates		[]int
-  transition		map[dfaTransitionData]int
-  symbolMap     map[string]bool
+	initialState int
+	currentState int
+	totalStates  []int
+	finalStates  []int
+	transition   map[transitionData]int
+	alphabetMap  map[string]bool
 }
 
-type dfaTransitionData struct {
-  srcState      int
-  symbol        string  
-} 
+//NewDFA creates new dfa
+func NewDFA(initialState int, isFinal bool) (*DFA, error) {
+	if initialState < 0 {
+		return nil, errors.New("Error, estado inicila no puede ser menos que 0")
+	}
 
-func NewDFA(initialState int, isFinal bool) *DFA {
 	newDFA := &DFA{
 		initialState: initialState,
 		currentState: initialState,
-    transition: make(map[dfaTransitionData]int),
-    symbolMap:  make(map[string]bool),
-  }
-  
-  newDFA.AddState(initialState, isFinal)
+		transition:   make(map[transitionData]int),
+		alphabetMap:  make(map[string]bool),
+	}
 
-  return newDFA
+	newDFA.AddState(initialState, isFinal)
+
+	return newDFA, nil
 }
 
+//AddState adds new state to dfa
 func (dfa *DFA) AddState(state int, isFinal bool) error {
-  if state < 0 {
-    return errors.New("Error, estado no puede ser menor a 0.")
-  }
+	if state < 0 {
+		return errors.New("Error, estado no puede ser menor a 0")
+	}
 
-  dfa.totalStates = append(dfa.totalStates, state)
+	dfa.totalStates = append(dfa.totalStates, state)
 
-  if isFinal {
-    dfa.finalStates = append(dfa.finalStates, state)
-  }
+	if isFinal {
+		dfa.finalStates = append(dfa.finalStates, state)
+	}
 
-  return nil
+	return nil
 }
 
-func (dfa *DFA) AddTransition(srcState int, symbol string, dstState int) error {
-  srcStateFound := false
+//AddTransition adds transitions from source state to a destination state
+func (dfa *DFA) AddTransition(srcState int, alphabet string, dstState int) error {
+	srcStateFound := false
 
-  for _, v := range dfa.totalStates {
-    if v == srcState {
-      srcStateFound = true
-    }
-  }
+	for _, v := range dfa.totalStates {
+		if v == srcState {
+			srcStateFound = true
+		}
+	}
 
-  if !srcStateFound {
-    return errors.New("Error, no se encontro ningun estado")
-  }
-  
-  if _, ok := dfa.symbolMap[symbol]; !ok {
-    dfa.symbolMap[symbol] = true
-  }
+	if !srcStateFound {
+		return errors.New("Error, no se encontro ningun estado")
+	}
 
-  newTrans := dfaTransitionData {
-    srcState: srcState,
-    symbol: symbol,
-  }
+	if alphabet == "" {
+		return errors.New("Error, estado no puede ser")
+	}
 
-  dfa.transition[newTrans] = dstState
+	if _, ok := dfa.alphabetMap[alphabet]; !ok {
+		dfa.alphabetMap[alphabet] = true
+	}
 
-  return nil
-}
+	newTrans := transitionData{
+		srcState: srcState,
+		alphabet: alphabet,
+	}
 
-func (dfa *DFA) ValidateFinalState() bool {
-  for _, val := dfa.finalState {
-    if v == dfa.currentState {
-      return true
-    }
-  }
-  return false
-}
-
-func (dfa *DFA) ValidateSymbol(symbols []string) bool {
-  for _, val := range symbols {
-    
-  }
-  return dfa.ValidateFinalState()
+	dfa.transition[newTrans] = dstState
+	return nil
 }
